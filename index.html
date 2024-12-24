@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>Deserialiser App</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-image: url("https://static.vecteezy.com/system/resources/previews/003/306/627/non_2x/seamless-pattern-with-christmas-tree-and-garland-balls-vector.jpg"); 
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        color: white;
+      }
+
+      .app-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .modal {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #333;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .modal h1 {
+        margin-bottom: 20px;
+        color: #c2185b;
+      }
+
+      .modal input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 2px solid #c2185b;
+        border-radius: 5px;
+      }
+
+      .modal button {
+        padding: 10px 20px;
+        margin: 5px;
+        background-color: #c2185b;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .modal button:hover {
+        background-color: #9f1746;
+      }
+
+      .result {
+        margin-top: 15px;
+        font-weight: bold;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="modal">
+        <h1>🎄 Deserialiser 🎅</h1>
+        <input id="text-input" type="text" placeholder="Escribe algo aquí..." />
+        <br />
+        <button onclick="encryptText()">Encriptar</button>
+        <button onclick="decryptText()">Desencriptar</button>
+        <div id="result" class="result"></div>
+      </div>
+    </div>
+
+    <script>
+      const deserialiser = new (class {
+        constructor(shift = 1) {
+          this.shift = shift;
+          this.alphabet = "abcdefghijklmnopqrstuvwxyz"; 
+        }
+
+        encrypt(text) {
+          const sanitizedText = this.sanitizeText(text);
+          return this.processText(sanitizedText, this.shift);
+        }
+
+        decrypt(text) {
+          const sanitizedText = this.sanitizeText(text);
+          return this.processText(sanitizedText, -this.shift);
+        }
+
+        sanitizeText(text) {
+          return text
+            .normalize("NFD") 
+            .replace(/[^\w\s]|_/g, "")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
+        }
+
+        processText(text, shift) {
+          const lowerAlphabet = this.alphabet;
+
+          return text
+            .split("")
+            .map((char) => {
+              if (lowerAlphabet.includes(char)) {
+                return this.shiftChar(char, shift, lowerAlphabet);
+              }
+              return char; // Devuelve caracteres que no son letras sin cambios
+            })
+            .join("");
+        }
+
+        shiftChar(char, shift, alphabet) {
+          const charIndex = alphabet.indexOf(char);
+          const newIndex = (charIndex + shift + alphabet.length) % alphabet.length;
+          return alphabet[newIndex];
+        }
+      })();
+
+      function encryptText() {
+        const input = document.getElementById("text-input").value;
+        const result = deserialiser.encrypt(input);
+        document.getElementById("result").innerText = `Encriptado: ${result}`;
+      }
+
+      function decryptText() {
+        const input = document.getElementById("text-input").value;
+        const result = deserialiser.decrypt(input);
+        document.getElementById("result").innerText = `Desencriptado: ${result}`;
+      }
+    </script>
+  </body>
+</html>
